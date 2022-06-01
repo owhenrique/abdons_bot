@@ -1,13 +1,5 @@
-"""
-Simple Bot to reply to Telegram messages.
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
+from pytube import YouTube as yt
+from googlesearch import search 
 
 import logging
 
@@ -28,14 +20,14 @@ def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     update.message.reply_markdown_v2(
-        fr'Hi {user.mention_markdown_v2()}\!',
+        fr'Olá {user.mention_markdown_v2()}\, eu sou o AbdonBot\!',
         reply_markup=ForceReply(selective=True),
     )
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    update.message.reply_text('Ajuda!')
 
 
 def echo(update: Update, context: CallbackContext) -> None:
@@ -45,6 +37,31 @@ def echo(update: Update, context: CallbackContext) -> None:
 def reverse_echo(update: Update, context: CallbackContext) -> None:
     """Reversed Echo user message."""
     update.message.reply_text(update.message.text[::-1])
+    
+def youtube(update: Update, context: CallbackContext) -> None:
+    """Search for a video on Google and send it."""
+    user_message = update.message.text
+    for s in search(user_message, tld="com", num=10, stop=5, pause=2):
+        print(s)
+        video = yt(s)
+        update.message.reply_text(s)
+        video_info = {
+            "title": video.title,
+            "author": video.author,
+            "channel_url": video.channel_url,
+            "description": video.description,
+            "length": video.length,
+            "views": video.views,
+            "rating": video.rating,
+        }
+        """update.message.reply(video.title, 
+                                  video.author, 
+                                  video.channel_url,
+                                  video.description, 
+                                  video.length, 
+                                  video.views, 
+                                  video.rating)"""
+    
 
 def main() -> None:
     """Start the bot."""
@@ -62,9 +79,10 @@ def main() -> None:
     # on different commands - answer in Telegram
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
-
+    
     # on non command i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, reverse_echo))
+    #dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, reverse_echo))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, youtube))
 
     # Start the Bot
     updater.start_polling()
