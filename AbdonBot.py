@@ -40,28 +40,27 @@ def reverse_echo(update: Update, context: CallbackContext) -> None:
     
 def youtube(update: Update, context: CallbackContext) -> None:
     """Search for a video on Google and send it."""
-    user_message = update.message.text
-    for s in search(user_message, tld="com", num=10, stop=5, pause=2):
-        print(s)
-        video = yt(s)
-        update.message.reply_text(s)
-        video_info = {
-            "title": video.title,
-            "author": video.author,
-            "channel_url": video.channel_url,
-            "description": video.description,
-            "length": video.length,
-            "views": video.views,
-            "rating": video.rating,
-        }
-        """update.message.reply(video.title, 
-                                  video.author, 
-                                  video.channel_url,
-                                  video.description, 
-                                  video.length, 
-                                  video.views, 
-                                  video.rating)"""
-    
+    try:
+        user_message = update.message.text
+        videos_list = []      
+        
+        for result in search(user_message, tld="com", num=10, stop=5, pause=2):
+            if('https://www.youtube.com/watch?' in result):
+                videos_list.append(result)
+
+        logger.info(
+            f'{videos_list}'
+        )
+        
+        update.message.reply_text("Esses foram os resultados que eu encontrei:")  
+        [update.message.reply_text(videos_list[element]) for element in range(len(videos_list))]
+            
+    except Exception as e:
+        logger.error(
+            f'{e}'
+        )
+        update.message.reply_text("Ocorreu um erro ao tentar pesquisar o vídeo.")
+       
 
 def main() -> None:
     """Start the bot."""
